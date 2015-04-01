@@ -1,0 +1,3 @@
+[submodule "miniroot"]
+	path = miniroot
+	url = https://github.com/BlankOn/miniroot.git
