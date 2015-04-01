@@ -4,6 +4,7 @@ This prepares a very minimal Cubieboard2 rootfs. At the moment it is configured 
 * sunxi-tools
 * linux-utils
 * a cubieboard2 kernel and modules
+* BlankOn miniroot: https://github.com/BlankOn/miniroot
 
 ### Preparations
 * Put kernel in the same directory of this script with `uImage` name.
