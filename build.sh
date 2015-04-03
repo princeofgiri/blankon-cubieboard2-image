@@ -26,10 +26,6 @@ mkimage -C none -A arm -T script -d boot.cmd boot.scr
 fex2bin script.fex > script.bin
 popd
 
-if [ -d lib ];then
-  cp -a lib build/
-fi
-
 OUTPUT=cubieboard2-blankon.img
 dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
 echo -e "o\nn\np\n1\n\n\nw\n" | /sbin/fdisk $OUTPUT 
