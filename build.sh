@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MODE=${1:-minimal}
+
 . settings
 
 if [ -d ./miniroot ];then
@@ -27,23 +29,79 @@ fex2bin script.fex > script.bin
 popd
 
 OUTPUT=cubieboard2-blankon.img
-dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
-echo -e "o\nn\np\n1\n\n\nw\n" | /sbin/fdisk $OUTPUT 
-sudo modprobe loop
-sudo kpartx -a $OUTPUT
-DEV=`sudo kpartx -l $OUTPUT | cut -f1 -d' '`
-if [ -z $DEV ];then
-  echo "Partitions in $OUTPUT can't be read"
+
+function minimal_mode {
+  dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
+  echo -e "o\nn\np\n1\n\n\nw\n" | /sbin/fdisk $OUTPUT 
+  sudo modprobe loop
+  sudo kpartx -a $OUTPUT
+  DEV=`sudo kpartx -l $OUTPUT | head -1 | cut -f1 -d' '`
+  if [ -z $DEV ];then
+    echo "Partitions in $OUTPUT can't be read"
+    exit
+  fi
+  sleep 1
+  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
+  mkdir -p mnt
+  sudo mount /dev/mapper/$DEV mnt
+  sudo cp -a build/* mnt 
+  sudo umount mnt
+  sudo kpartx -d $OUTPUT
+}
+
+function debootstrap_mode {
+  dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
+  echo -e "o\nn\np\n1\n\n+10M\nn\np\n\n\n\nw\n" | /sbin/fdisk $OUTPUT 
+  sudo modprobe loop
+  sudo kpartx -a $OUTPUT
+
+  # First partition
+  DEV=`sudo kpartx -l $OUTPUT | head -1 | cut -f1 -d' '`
+  if [ -z $DEV ];then
+    echo "Partitions in $OUTPUT can't be read"
+    exit
+  fi
+  sleep 1
+  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
+  mkdir -p mnt
+  sudo mount /dev/mapper/$DEV mnt
+  sudo cp -a build/* mnt 
+  sudo umount mnt
+
+  # Second partition
+  DEV=`sudo kpartx -l $OUTPUT | tail -1 | cut -f1 -d' '`
+  if [ -z $DEV ];then
+    echo "Partitions in $OUTPUT can't be read"
+    exit
+  fi
+  sleep 1
+  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
+  mkdir -p mnt
+  sudo mount /dev/mapper/$DEV mnt
+  sudo cp -a devrootfs/* mnt 
+  sudo umount mnt
+
+  sudo kpartx -d $OUTPUT
+
+}
+
+if [ $MODE = "minimal" ];then
+  minimal_mode
+elif [ $MODE = "debootstrap" ];then
+  MIN_SIZE=1000
+  if [ $SIZE -lt $MIN_SIZE ];then
+    echo "SIZE in settings is too small for debootstrap mode"
+    echo "It should be more than $MIN_SIZE"
+    exit
+  fi
+  debootstrap_mode
+else
+  echo "No valid mode specified"
   exit
 fi
-sleep 1
-sudo mkfs.ext4 /dev/mapper/$DEV
-sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
-mkdir -p mnt
-sudo mount /dev/mapper/$DEV mnt
-sudo cp -a build/* mnt 
-sudo umount mnt
-sudo kpartx -d $OUTPUT
 
 dd if=build/boot/sunxi-spl.bin of=$OUTPUT bs=1024 seek=8 conv=notrunc
 dd if=build/boot/u-boot.bin    of=$OUTPUT bs=1024 seek=32 conv=notrunc
