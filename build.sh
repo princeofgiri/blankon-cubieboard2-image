@@ -51,6 +51,13 @@ function minimal_mode {
 }
 
 function debootstrap_mode {
+  if [ ! -d devrootfs ];then
+    echo "devrootfs/ directory is not found"
+    echo "You should prepare a debootstrap in that directory"
+    echo "e.g. $ sudo debootstrap sid devrootfs"
+    exit
+  fi
+
   dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
   echo -e "o\nn\np\n1\n\n+10M\nn\np\n\n\n\nw\n" | /sbin/fdisk $OUTPUT 
   sudo modprobe loop
@@ -79,6 +86,7 @@ function debootstrap_mode {
   sleep 1
   sudo mkfs.ext4 /dev/mapper/$DEV
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
+
   mkdir -p mnt
   sudo mount /dev/mapper/$DEV mnt
   sudo cp -a devrootfs/* mnt 
