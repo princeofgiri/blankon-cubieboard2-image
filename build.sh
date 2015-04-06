@@ -94,6 +94,9 @@ function debootstrap_mode {
 
   sudo kpartx -d $OUTPUT
 
+  pushd build/;find . | cpio -H newc -o > ../initramfs.img;popd
+  echo "Initramfs image is in initramfs.img"
+
 }
 
 if [ $MODE = "minimal" ];then
