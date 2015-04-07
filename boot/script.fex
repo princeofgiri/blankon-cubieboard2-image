@@ -247,7 +247,10 @@ ctp_revert_x_flag = 0
 ctp_revert_y_flag = 1
 ctp_exchange_x_y_flag = 0
 ctp_firm = 1
-ctp_wakeup = port:PB13<1><default><default><1>
+ctp_int_port = port:PH21<6><default><default><default> 
+ctp_wakeup = port:PB13<1><default><default><1> 
+#ctp_io_port = port:PH21<0><default><default><default> 
+#rst_port = port:PH20<1><default><default><default> 
 
 [ctp_list_para]
 ctp_det_used = 1
@@ -328,8 +331,8 @@ lcd1_hue = 50
 
 [lcd0_para]
 lcd_used = 1
-lcd_x = 800 
-lcd_y = 400
+lcd_x = 800
+lcd_y = 480
 lcd_dclk_freq = 33
 lcd_pwm_not_used = 0
 lcd_pwm_ch = 0
