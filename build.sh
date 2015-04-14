@@ -43,9 +43,17 @@ function minimal_mode {
   sleep 1
   sudo mkfs.ext4 /dev/mapper/$DEV
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
+
+  pushd build/;find . | cpio -H newc -o > ../initramfs.img;popd
+  echo "Initramfs image is in initramfs.img"
+  mkimage -A arm -O linux -T ramdisk -d initramfs.img initramfs.uImage
+
   mkdir -p mnt
   sudo mount /dev/mapper/$DEV mnt
-  sudo cp -a build/* mnt 
+  sudo mkdir -p mnt/boot
+  sudo cp -a build/boot/{script.bin,boot.scr,uEnv.txt} mnt/boot 
+  sudo cp uImage mnt/boot
+  sudo cp initramfs.uImage mnt/boot
   sudo umount mnt
   sudo kpartx -d $OUTPUT
 }
@@ -59,7 +67,7 @@ function debootstrap_mode {
   fi
 
   dd if=/dev/zero of=$OUTPUT  bs=1M count=$SIZE
-  echo -e "o\nn\np\n1\n\n+10M\nn\np\n\n\n\nw\n" | /sbin/fdisk $OUTPUT 
+  echo -e "o\nn\np\n1\n\n+15M\nn\np\n\n\n\nw\n" | /sbin/fdisk $OUTPUT 
   sudo modprobe loop
   sudo kpartx -a $OUTPUT
 
