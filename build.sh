@@ -74,6 +74,12 @@ function debootstrap_mode {
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
   mkdir -p mnt
   sudo mount /dev/mapper/$DEV mnt
+
+  pushd build/;find . | cpio -H newc -o > ../initramfs.img;popd
+  echo "Initramfs image is in initramfs.img"
+  mkimage -A arm -O linux -T ramdisk -d initramfs.img initramfs.uImage
+  cp initramfs.uImage build/boot
+
   sudo cp -a build/* mnt 
   sudo umount mnt
 
@@ -93,9 +99,6 @@ function debootstrap_mode {
   sudo umount mnt
 
   sudo kpartx -d $OUTPUT
-
-  pushd build/;find . | cpio -H newc -o > ../initramfs.img;popd
-  echo "Initramfs image is in initramfs.img"
 
 }
 
