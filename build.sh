@@ -19,7 +19,7 @@ if [ ! -f uImage ];then
 fi
 
 rm -rf build
-if [ ! "x$2" = "xdebootstrap" ]; then
+if [ ! "x$1" = "xdebootstrap" ]; then
   mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
 fi
 cp -a boot build/
