@@ -19,7 +19,9 @@ if [ ! -f uImage ];then
 fi
 
 rm -rf build
-mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
+if [ ! "x$2" = "xdebootstrap" ]; then
+  mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
+fi
 cp -a boot build/
 cp -a miniroot/build/* build/
 cp uImage build/boot/
