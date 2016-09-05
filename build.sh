@@ -19,9 +19,7 @@ if [ ! -f uImage ];then
 fi
 
 rm -rf build
-if [ ! "x$1" = "xdebootstrap" ]; then
-  mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
-fi
+mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
 cp -a boot build/
 cp -a miniroot/build/* build/
 cp uImage build/boot/
@@ -43,7 +41,7 @@ function minimal_mode {
     exit
   fi
   sleep 1
-  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo mkfs.ext2 /dev/mapper/$DEV
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
 
   pushd build/;find . | cpio -H newc -o > ../initramfs.img;popd
@@ -80,7 +78,7 @@ function debootstrap_mode {
     exit
   fi
   sleep 1
-  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo mkfs.ext2 /dev/mapper/$DEV
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
   mkdir -p mnt
   sudo mount /dev/mapper/$DEV mnt
@@ -100,7 +98,7 @@ function debootstrap_mode {
     exit
   fi
   sleep 1
-  sudo mkfs.ext4 /dev/mapper/$DEV
+  sudo mkfs.ext2 /dev/mapper/$DEV
   sudo tune2fs -i 0 -c 0 /dev/mapper/$DEV  -L BlankOn -O ^has_journal
 
   mkdir -p mnt
@@ -130,5 +128,4 @@ fi
 dd if=build/boot/sunxi-spl.bin of=$OUTPUT bs=1024 seek=8 conv=notrunc
 dd if=build/boot/u-boot.bin    of=$OUTPUT bs=1024 seek=32 conv=notrunc
 
-
-
+sudo losetup -d /dev/${DEV:0:5}
