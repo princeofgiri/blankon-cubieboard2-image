@@ -4,6 +4,7 @@ This prepares a minimal BlankOn for Cubieboard2. At the moment it is configured 
 * sunxi-tools
 * linux-utils
 * a cubieboard2 kernel and modules
+* BlankOn armhf rootfs
 
 ### Preparations
 * make and make install sunxi-tools
