@@ -18,10 +18,14 @@ if [ ! -f uImage ];then
   exit
 fi
 
-rm -rf build
-mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
+rm -rf build/
+mkdir build/
+rm -rf miniroot/build
+if [ $1 != "debootstrap" ];then
+    mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
+    cp -a miniroot/build/* build/
+fi
 cp -a boot build/
-cp -a miniroot/build/* build/
 cp uImage build/boot/
 pushd build/boot
 mkimage -C none -A arm -T script -d boot.cmd boot.scr 
@@ -124,6 +128,8 @@ else
   echo "No valid mode specified"
   exit
 fi
+
+#dd if=build/boot/u-boot-sunxi-with-spl.bin of=$OUTPUT bs=1024 seek=8 conv=notrunc
 
 dd if=build/boot/sunxi-spl.bin of=$OUTPUT bs=1024 seek=8 conv=notrunc
 dd if=build/boot/u-boot.bin    of=$OUTPUT bs=1024 seek=32 conv=notrunc
