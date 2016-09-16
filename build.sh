@@ -21,7 +21,7 @@ cp -a boot build/
 cp uImage build/boot/
 pushd build/boot
 mkimage -C none -A arm -T script -d boot.cmd boot.scr 
-fex2bin script.fex > script.bin
+fex2bin cubieboard2-cubiescreen.fex > script.bin
 popd
 
 OUTPUT=cubieboard2-blankon.img
