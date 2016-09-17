@@ -4,6 +4,10 @@ MODE=${1:-minimal}
 
 . settings
 
+rm -rf build/
+mkdir build/
+rm -rf miniroot/build
+
 if [ -d ./miniroot ];then
   ./miniroot/build.sh
 else
@@ -18,9 +22,6 @@ if [ ! -f uImage ];then
   exit
 fi
 
-rm -rf build/
-mkdir build/
-rm -rf miniroot/build
 if [ $1 != "debootstrap" ];then
     mkdir -p build/{tmp,dev,proc,sbin,usr/sbin}
     cp -a miniroot/build/* build/
